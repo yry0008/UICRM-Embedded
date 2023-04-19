@@ -51,6 +51,11 @@ void RM_RTOS_Default_Task(const void* arg) {
     while (true) {
         set_cursor(0, 0);
         clear_screen();
+        size_t availmem = xPortGetFreeHeapSize();
+        size_t minavailmem = xPortGetMinimumEverFreeHeapSize();
+        size_t totalmem = configTOTAL_HEAP_SIZE;
+        print("Free Heap:%d/%d Bytes\r\n", availmem, totalmem);
+        print("Min Free Heap:%d Bytes\r\n", minavailmem);
         switch (remote_mode) {
             case REMOTE_MODE_PREPARE:
                 strcpy(s, "PREPARE");
