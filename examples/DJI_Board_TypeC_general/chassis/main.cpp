@@ -37,7 +37,7 @@ remote::DBUS* dbus = nullptr;
 void RM_RTOS_Init() {
     HAL_Delay(200);
     print_use_uart(&huart1);
-    can = new bsp::CAN(&hcan1, 0x201, true);
+    can = new bsp::CAN(&hcan2, 0x201, false);
     fl_motor = new driver::Motor3508(can, 0x202);
     fr_motor = new driver::Motor3508(can, 0x201);
     bl_motor = new driver::Motor3508(can, 0x203);

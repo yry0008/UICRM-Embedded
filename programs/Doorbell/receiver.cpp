@@ -37,7 +37,7 @@ const osThreadAttr_t receiveTaskAttribute = {.name = "receiveTask",
                                              .cb_mem = nullptr,
                                              .cb_size = 0,
                                              .stack_mem = nullptr,
-                                             .stack_size = 128 * 4,
+                                             .stack_size = 256 * 4,
                                              .priority = (osPriority_t)osPriorityNormal,
                                              .tz_module = 0,
                                              .reserved = 0};
@@ -53,12 +53,17 @@ class ReceiverUART : public bsp::UART {
     /* notify application when rx data is pending read */
     void RxCompleteCallback() final {
         uint8_t* data;
-        this->Read(&data);
-        if(strcmp((char*)data,"Song")==0){
-            osThreadFlagsSet(receiveTaskHandle, RX_SIGNAL);
+        uint32_t length;
+        length=this->Read<true>(&data);
+        if(length==5) {
+            if (strcmp((char*)data, "Song") == 0) {
+                osThreadFlagsSet(receiveTaskHandle, RX_SIGNAL);
+            }
         }
     }
 };
+
+static ReceiverUART* uart1=nullptr;
 
 static driver::Buzzer* buzzer= nullptr;
 
@@ -74,6 +79,7 @@ driver::BuzzerNoteDelayed SevenEleven[] = {
     {Note::Re2H,500},
     {Note::So5M,500},
     {Note::Do1H,1000},
+    {Note::Finish,0}
 };
 
 void singTask(void* arg) {
@@ -83,15 +89,16 @@ void singTask(void* arg) {
         if (flags & RX_SIGNAL) {  // unnecessary check
             buzzer->SingSong(SevenEleven,bsp::DelayMilliSecond);
         }
+        osThreadFlagsClear(RX_SIGNAL);
     }
 }
 
-static ReceiverUART* uart1=nullptr;
+
 
 void RM_RTOS_Init() {
     uart1 = new ReceiverUART(&huart1);
-    uart1->SetupTx(100);
-    uart1->SetupRx(100);
+    uart1->SetupTx(6);
+    uart1->SetupRx(6);
     receiveTaskHandle = osThreadNew(singTask, nullptr,&receiveTaskAttribute);
     buzzer = new driver::Buzzer(&htim1, 1, 1000000);
 }
@@ -100,6 +107,6 @@ void RM_RTOS_Default_Task(const void* arg) {
     UNUSED(arg);
 
     while (true) {
-
+        osDelay(200);
     }
 }

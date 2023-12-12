@@ -37,8 +37,8 @@ static bsp::UART* uart1 = nullptr;
 void RM_RTOS_Init() {
     key= new bsp::GPIO(KEY_GPIO_Port,KEY_Pin);
     uart1 = new bsp::UART(&huart1);
-    uart1->SetupTx(100);
-    uart1->SetupRx(100);
+    uart1->SetupTx(6);
+    uart1->SetupRx(6);
 }
 
 void RM_RTOS_Default_Task(const void* arg) {
@@ -47,12 +47,12 @@ void RM_RTOS_Default_Task(const void* arg) {
     while (true) {
         if(key->Read()==0){
             const char data[] = "Song";
-            uart1->Write((uint8_t*)data,strlen(data));
+            uart1->Write((uint8_t*)data,strlen(data)+1);
         }else{
             const char data[] = "Stop";
-            uart1->Write((uint8_t*)data,strlen(data));
+            uart1->Write((uint8_t*)data,strlen(data)+1);
         }
         //print("key: %d\n", key.Read() == true ? 1 : 0);
-        osDelay(50);
+        osDelay(10);
     }
 }
