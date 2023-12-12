@@ -53,4 +53,8 @@ namespace bsp {
         return getRunTimeCounterValue();
     }
 
+    void DelayMilliSecond(uint32_t ticks){
+        osDelay(ticks);
+    }
+
 } /* namespace bsp */

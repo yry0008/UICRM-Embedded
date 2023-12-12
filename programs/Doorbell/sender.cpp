@@ -18,43 +18,41 @@
  # <https://www.gnu.org/licenses/>.                         #
  ###########################################################*/
 
-#include "bsp_os.h"
+#include "main.h"
+#include "cmsis_os2.h"
 
-#include "cmsis_os.h"
-#include "task.h"
+#include "string.h"
 
-static TIM_HandleTypeDef* htim_os = nullptr;
+#include "bsp_uart.h"
+#include "bsp_gpio.h"
 
-/**
- * @brief override FreeRTOS weak function to configure the timer used for
- * generating run-time stats
- */
-extern "C" void configureTimerForRunTimeStats(void) {
-    if (!htim_os)
-        return;
-    __HAL_TIM_SET_AUTORELOAD(htim_os, 0xffffffff);
-    __HAL_TIM_SET_COUNTER(htim_os, 0);
-    __HAL_TIM_ENABLE(htim_os);
+#include "buzzer.h"
+#include "tim.h"
+
+using Note = driver::BuzzerNote;
+
+static bsp::GPIO* key = nullptr;
+static bsp::UART* uart1 = nullptr;
+
+void RM_RTOS_Init() {
+    key= new bsp::GPIO(KEY_GPIO_Port,KEY_Pin);
+    uart1 = new bsp::UART(&huart1);
+    uart1->SetupTx(100);
+    uart1->SetupRx(100);
 }
 
-extern "C" unsigned long getRunTimeCounterValue(void) {
-    if (!htim_os)
-        return 0;
-    return htim_os->Instance->CNT;
+void RM_RTOS_Default_Task(const void* arg) {
+    UNUSED(arg);
+
+    while (true) {
+        if(key->Read()==0){
+            const char data[] = "Song";
+            uart1->Write((uint8_t*)data,strlen(data));
+        }else{
+            const char data[] = "Stop";
+            uart1->Write((uint8_t*)data,strlen(data));
+        }
+        //print("key: %d\n", key.Read() == true ? 1 : 0);
+        osDelay(50);
+    }
 }
-
-namespace bsp {
-
-    void SetHighresClockTimer(TIM_HandleTypeDef* htim) {
-        htim_os = htim;
-    }
-
-    uint64_t GetHighresTickMicroSec(void) {
-        return getRunTimeCounterValue();
-    }
-
-    void DelayMilliSecond(uint64_t ticks){
-        osDelay(ticks);
-    }
-
-} /* namespace bsp */

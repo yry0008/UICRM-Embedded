@@ -40,4 +40,10 @@ namespace bsp {
      */
     uint64_t GetHighresTickMicroSec(void);
 
+    /**
+     * @brief delay ms
+     *
+     * @param ticks The [ms] we need to delay.
+     */
+     void DelayMilliSecond(uint64_t ticks);
 } /* namespace bsp */
