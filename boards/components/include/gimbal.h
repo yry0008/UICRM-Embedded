@@ -205,7 +205,13 @@ namespace control {
          */
         void UpdateOffset(float pitch_offset, float yaw_offset);
 
-      private:
+
+        float expect_yaw_curr_ = 0;
+        float expect_pitch_curr_ = 0;
+        float expect_yaw_omega_ = 0;
+        float expect_pitch_omega_ = 0;
+
+      public:
         // acquired from user
         driver::MotorCANBase* pitch_motor_ = nullptr;
         driver::MotorCANBase* yaw_motor_ = nullptr;
@@ -232,6 +238,8 @@ namespace control {
         // state detectors
         BoolEdgeDetector pitch_detector_; /* pitch pid mode toggle detector */
         BoolEdgeDetector yaw_detector_;   /* yaw pid mode toggle detector   */
+
+
     };
 
 }  // namespace control

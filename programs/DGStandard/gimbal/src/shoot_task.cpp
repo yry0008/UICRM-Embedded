@@ -51,6 +51,10 @@ void shootTask(void* arg) {
     while (ahrs->IsCailbrated()) {
         osDelay(SHOOT_OS_DELAY);
     }
+
+    driver::MotorCANBase* motors[] = {steering_motor};
+
+
     //    int last_state = remote::MID;
     //    int last_state_2 = remote::MID;
     //    uint8_t shoot_state = 0;
@@ -62,11 +66,12 @@ void shootTask(void* arg) {
     //    uint16_t shoot_time_count = 0;
     uint8_t servo_back = 0;
     //    bool can_shoot_click = false;
-    RampSource ramp_1 = RampSource(0, 0, 325, 0.001);
-    RampSource ramp_2 = RampSource(0, 0, 325, 0.001);
+    RampSource ramp_1 = RampSource(0, 0, 800, 0.001);
+    RampSource ramp_2 = RampSource(0, 0, 800, 0.001);
 
     load_servo->SetTarget(load_servo->GetTheta(), true);
     load_servo->CalcOutput();
+    driver::MotorCANBase::TransmitOutput(motors, 1);
 
     ShootMode last_shoot_mode = SHOOT_MODE_STOP;
 
@@ -151,21 +156,21 @@ void shootTask(void* arg) {
         switch (shoot_fric_mode) {
             case SHOOT_FRIC_MODE_PREPARING:
             case SHOOT_FRIC_MODE_PREPARED:
-                shoot_flywheel_offset = 200;
+                shoot_flywheel_offset = 400;
                 // laser->SetOutput(255);
                 break;
             case SHOOT_FRIC_MODE_STOP:
-                shoot_flywheel_offset = -200;
+                shoot_flywheel_offset = -400;
                 // laser->SetOutput(0);
                 break;
             case SHOOT_FRIC_SPEEDUP:
-                ramp_1.SetMax(min(400.0f, ramp_1.GetMax() + 25));
-                ramp_2.SetMax(min(400.0f, ramp_2.GetMax() + 25));
+                ramp_1.SetMax(min(900.0f, ramp_1.GetMax() + 25));
+                ramp_2.SetMax(min(900.0f, ramp_2.GetMax() + 25));
                 shoot_fric_mode = SHOOT_FRIC_MODE_PREPARING;
                 break;
             case SHOOT_FRIC_SPEEDDOWN:
-                ramp_1.SetMax(max(200.0f, ramp_1.GetMax() - 25));
-                ramp_2.SetMax(max(200.0f, ramp_2.GetMax() - 25));
+                ramp_1.SetMax(max(500.0f, ramp_1.GetMax() - 25));
+                ramp_2.SetMax(max(500.0f, ramp_2.GetMax() - 25));
                 shoot_fric_mode = SHOOT_FRIC_MODE_PREPARING;
                 break;
             default:
@@ -294,9 +299,9 @@ void shootTask(void* arg) {
         //                }
         //            }
         //        }
-        // 计算输出，由于拔弹电机的输出系统由云台托管，不需要再次处理can的传输
+        // 计算输出
         load_servo->CalcOutput();
-
+        driver::MotorCANBase::TransmitOutput(motors, 1);
         osDelay(SHOOT_OS_DELAY);
     }
 }
@@ -307,7 +312,7 @@ void init_shoot() {
     flywheel_left->SetOutput(0);
     flywheel_right->SetOutput(0);
 
-    steering_motor = new driver::Motor2006(can2, 0x207);
+    steering_motor = new driver::Motor2006(can1, 0x207);
 
     driver::servo_t servo_data;
     servo_data.motor = steering_motor;
@@ -329,7 +334,9 @@ void init_shoot() {
     // laser = new bsp::Laser(&htim3, 3, 1000000);
 }
 void kill_shoot() {
+    driver::MotorCANBase* motors[] = {steering_motor};
     steering_motor->SetOutput(0);
     flywheel_left->SetOutput(0);
     flywheel_right->SetOutput(0);
+    driver::MotorCANBase::TransmitOutput(motors, 1);
 }

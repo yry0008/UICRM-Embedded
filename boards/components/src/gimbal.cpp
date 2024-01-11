@@ -72,8 +72,15 @@ namespace control {
             pt_diff = 0;
         }
         float pt_out = pitch_theta_pid_->ComputeOutput(pt_diff);
+
+        expect_pitch_omega_ = pt_out;
+
         float po_in = pitch_motor_->GetOmegaDelta(pt_out);
         float po_out = pitch_omega_pid_->ComputeConstrainedOutput(po_in);
+
+        expect_pitch_curr_ = po_out;
+
+        // 角度差 -> 目标角速度
         float yt_diff = yaw_motor_->GetThetaDelta(yaw_angle_);
         yt_diff = wrap<float>(yt_diff, -PI, PI);
 
@@ -82,8 +89,13 @@ namespace control {
         }
 
         float yt_out = yaw_theta_pid_->ComputeOutput(yt_diff);
+        expect_yaw_omega_ = yt_out;
+
+        // 角速度差 -> 目标电流
         float yo_in = yaw_motor_->GetOmegaDelta(yt_out);
         float yo_out = yaw_omega_pid_->ComputeConstrainedOutput(yo_in);
+
+        expect_yaw_curr_ = yo_out;
 
         pitch_motor_->SetOutput(po_out);
         yaw_motor_->SetOutput(yo_out);
@@ -105,8 +117,14 @@ namespace control {
         }
 
         float pt_out = pitch_theta_pid_->ComputeOutput(pt_diff);
+
+        expect_pitch_omega_ = pt_out;
+
         float po_in = pitch_motor_->GetOmegaDelta(pt_out);
         float po_out = pitch_omega_pid_->ComputeConstrainedOutput(po_in);
+
+
+        expect_pitch_curr_ = po_out;
 
         float yt_diff = yaw_angle_ - data_.yaw_offset_ - yaw;
         if (!data_.yaw_circle_) {
@@ -127,8 +145,13 @@ namespace control {
         }
 
         float yt_out = yaw_theta_pid_->ComputeOutput(yt_diff);
+
+        expect_yaw_omega_ = yt_out;
+
         float yo_in = yaw_motor_->GetOmegaDelta(yt_out);
         float yo_out = yaw_omega_pid_->ComputeConstrainedOutput(yo_in);
+
+        expect_yaw_curr_ = yo_out;
 
         pitch_motor_->SetOutput(po_out);
         yaw_motor_->SetOutput(yo_out);

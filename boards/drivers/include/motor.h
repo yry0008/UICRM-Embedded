@@ -180,10 +180,11 @@ namespace driver {
         volatile float theta_;
         volatile float omega_;
 
+        uint16_t tx_id_;
+
       private:
         bsp::CAN* can_;
         uint16_t rx_id_;
-        uint16_t tx_id_;
     };
 
     /**
@@ -244,7 +245,7 @@ namespace driver {
     class Motor6020 : public MotorCANBase {
       public:
         /* constructor wrapper over MotorCANBase */
-        Motor6020(bsp::CAN* can, uint16_t rx_id);
+        Motor6020(bsp::CAN* can, uint16_t rx_id,bool current_ctl = false);
         /* implements data update callback */
         void UpdateData(const uint8_t data[]) override final;
         /* implements data printout */

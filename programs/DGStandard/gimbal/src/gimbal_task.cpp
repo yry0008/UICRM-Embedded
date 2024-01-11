@@ -67,11 +67,14 @@ void gimbalTask(void* arg) {
     Buzzer_Sing(SingCaliDone);
     float pitch_ratio, yaw_ratio;
     float pitch_curr, yaw_curr;
+    UNUSED(pitch_curr);
+    UNUSED(yaw_curr);
     pitch_curr = ahrs->INS_angle[2];
     yaw_curr = ahrs->INS_angle[0];
     float pitch_target = 0, yaw_target = 0;
 
     while (true) {
+
         if (remote_mode == REMOTE_MODE_KILL) {
             kill_gimbal();
             osDelay(GIMBAL_OS_DELAY);
@@ -126,9 +129,9 @@ void gimbalTask(void* arg) {
                 gimbal->TargetRel(pitch_diff, yaw_diff);
                 gimbal->UpdateIMU(pitch_curr, yaw_curr);
                 break;
-                //                gimbal->TargetRel(pitch_diff, yaw_diff);
-                //                gimbal->Update();
-                //                break;
+//                                gimbal->TargetRel(pitch_diff, yaw_diff);
+//                                gimbal->Update();
+//                                break;
             default:
                 kill_gimbal();
         }
@@ -142,8 +145,8 @@ void gimbalTask(void* arg) {
 void init_gimbal() {
     init_gimbalBasicData();
     init_gimbalSpinData();
-    pitch_motor = new driver::Motor6020(can2, 0x20A);
-    yaw_motor = new driver::Motor6020(can1, 0x209);
+    pitch_motor = new driver::Motor6020(can2, 0x20A,true);
+    yaw_motor = new driver::Motor6020(can1, 0x209,true);
     control::gimbal_t gimbal_data;
     gimbal_data.pitch_motor = pitch_motor;
     gimbal_data.yaw_motor = yaw_motor;

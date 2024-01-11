@@ -139,8 +139,11 @@ namespace driver {
         return raw_temperature_;
     }
 
-    Motor6020::Motor6020(CAN* can, uint16_t rx_id) : MotorCANBase(can, rx_id) {
+    Motor6020::Motor6020(CAN* can, uint16_t rx_id,bool current_ctl) : MotorCANBase(can, rx_id) {
         can->RegisterRxCallback(rx_id, can_motor_callback, this);
+        if(current_ctl){
+            tx_id_--;
+        }
     }
 
     void Motor6020::UpdateData(const uint8_t data[]) {

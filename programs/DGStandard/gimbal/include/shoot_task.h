@@ -40,7 +40,6 @@ const osThreadAttr_t shootTaskAttribute = {.name = "shootTask",
                                            .priority = (osPriority_t)osPriorityNormal,
                                            .tz_module = 0,
                                            .reserved = 0};
-
 extern driver::MotorCANBase* steering_motor;
 void shootTask(void* arg);
 void init_shoot();
