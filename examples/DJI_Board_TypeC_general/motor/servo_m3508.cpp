@@ -30,7 +30,7 @@ bsp::CAN* can1 = NULL;
 driver::MotorCANBase* motor1 = NULL;
 driver::ServoMotor* load_servo = NULL;
 remote::DBUS* dbus = nullptr;
-float load_step_angle = 2 * PI / 8;
+float load_step_angle = 20 * PI;
 
 void RM_RTOS_Init() {
     bsp::SetHighresClockTimer(&htim5);
@@ -38,15 +38,15 @@ void RM_RTOS_Init() {
     print_use_uart(&huart6);
     dbus = new remote::DBUS(&huart3);
     can1 = new bsp::CAN(&hcan1, true);
-    motor1 = new driver::Motor2006(can1, 0x201);
+    motor1 = new driver::Motor3508(can1, 0x201);
 
     driver::servo_t servo_data;
     servo_data.motor = motor1;
-    servo_data.max_speed = 2.5 * PI;
-    servo_data.max_acceleration = 16 * PI;
+    servo_data.max_speed = 30 * PI;
+    servo_data.max_acceleration = 50 * PI;
     servo_data.transmission_ratio = M3508P19_RATIO;
-    servo_data.omega_pid_param = new float[3]{6000, 80, 0.3};
-    servo_data.max_iout = 6000;
+    servo_data.omega_pid_param = new float[3]{12000, 200, 0.3};
+    servo_data.max_iout = 18000;
     servo_data.max_out = 32768;
     servo_data.hold_pid_param = new float[3]{150, 10, 0.01};
     servo_data.hold_max_iout = 3000;
@@ -57,28 +57,29 @@ void RM_RTOS_Init() {
 
 void RM_RTOS_Default_Task(const void* args) {
     UNUSED(args);
+
     driver::MotorCANBase* motors[] = {motor1};
     int last_state = remote::MID;
-    int state = 0;
 
     while (true) {
-        if (dbus->swl == remote::UP) {
-            if (last_state == remote::MID)
-                last_state = remote::UP;
-        } else if (dbus->swl == remote::MID) {
+        if (last_state != dbus->swl && dbus->swl == remote::MID) {
             if (last_state == remote::UP) {
-                last_state = remote::MID;
                 load_servo->SetTarget(load_servo->GetTarget() + load_step_angle);
-                if (state == 0) {
-                    state = 1;
-                } else {
-                    state = 0;
-                }
+            } else if (last_state == remote::DOWN) {
+                load_servo->SetTarget(load_servo->GetTarget() - load_step_angle);
+            }
+        } else {
+            if (dbus->ch3 > 0) {
+                load_servo->SetTarget(load_servo->GetTarget() + load_step_angle);
+            } else if (dbus->ch3 < 0) {
+                load_servo->SetTarget(load_servo->GetTarget() - load_step_angle);
             }
         }
+
         load_servo->CalcOutput();
 
         driver::MotorCANBase::TransmitOutput(motors, 1);
+        last_state = dbus->swl;
         osDelay(1);
     }
 }

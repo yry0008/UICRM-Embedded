@@ -36,7 +36,7 @@ void init_gimbalBasicData() {
     float yaw_omega_max_iout = 2000;  // 10000
     float yaw_omega_max_out = 16383;
     float* pitch_theta_pid_param = new float[3]{10, 0, 10};
-    float* pitch_omega_pid_param = new float[3]{2000, 50, 0};
+    float* pitch_omega_pid_param = new float[3]{3000, 100, 0};
     float* yaw_theta_pid_param = new float[3]{25, 0, 500};
 //    float* yaw_theta_pid_param = new float[3]{0, 0, 0};
     float* yaw_omega_pid_param = new float[3]{500, 1, 200};
