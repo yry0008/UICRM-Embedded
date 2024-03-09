@@ -53,6 +53,7 @@
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 extern UART_HandleTypeDef huart5;
+extern DMA_HandleTypeDef hdma_uart5_rx;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -711,6 +712,16 @@ void FDCAN3_IT1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+void DMA2_Stream7_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream7_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_uart5_rx);
+  /* USER CODE BEGIN DMA2_Stream7_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream7_IRQn 1 */
+}
 void UART5_IRQHandler(void)
 {
   /* USER CODE BEGIN UART7_IRQn 0 */

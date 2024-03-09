@@ -90,6 +90,7 @@ void USART10_IRQHandler(void);
 void FDCAN3_IT0_IRQHandler(void);
 void FDCAN3_IT1_IRQHandler(void);
 /* USER CODE BEGIN EFP */
+void DMA2_Stream7_IRQHandler(void);
 void UART5_IRQHandler(void);
 /* USER CODE END EFP */
 
